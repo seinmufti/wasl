@@ -11,12 +11,9 @@ export function InvoiceLoadingShell() {
   return (
     <PageShell
       footer={
-        <div className="grid grid-cols-2 gap-3">
-          <Button disabled>{t("save")}</Button>
-          <Button variant="outline" disabled>
-            {t("export")}
-          </Button>
-        </div>
+        <Button disabled className="w-full">
+          {t("export")}
+        </Button>
       }
     >
       <div className="flex justify-center py-16">

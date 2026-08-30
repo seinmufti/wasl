@@ -46,6 +46,39 @@ export function imageToPdf(dataUrl: string): Blob {
   return pdf.output("blob");
 }
 
+export async function downloadBlob(blob: Blob, filename: string): Promise<void> {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+export async function shareBlob(
+  blob: Blob,
+  filename: string,
+  title: string,
+): Promise<void> {
+  if (!navigator.share) {
+    throw new Error("Share not supported");
+  }
+
+  const file = new File([blob], filename, { type: blob.type });
+
+  try {
+    await navigator.share({ files: [file], title });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") throw error;
+    if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+      throw new Error("Share not supported");
+    }
+    throw error;
+  }
+}
+
 export async function shareOrDownload(
   blob: Blob,
   filename: string,
@@ -62,14 +95,7 @@ export async function shareOrDownload(
     if (error instanceof Error && error.name === "AbortError") return;
   }
 
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  await downloadBlob(blob, filename);
 }
 
 export async function fileToDataUrl(file: File, max = 512): Promise<string> {

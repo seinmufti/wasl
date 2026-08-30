@@ -16,6 +16,10 @@ export function iqdPerUsd(exchangeRate: number): number {
   return (Number(exchangeRate) || 0) / EXCHANGE_RATE_USD_BASE;
 }
 
+export function hasExchangeRate(exchangeRate: number): boolean {
+  return Number(exchangeRate) > 0;
+}
+
 export function grandTotalIqd(invoice: Pick<Invoice, "lines" | "exchangeRate">): number {
   return grandTotalUsd(invoice) * iqdPerUsd(invoice.exchangeRate);
 }

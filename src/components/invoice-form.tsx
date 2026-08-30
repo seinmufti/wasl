@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { HundredDollarBill } from "@/components/hundred-dollar-bill";
+import { useDebugInvoiceFill } from "@/components/debug-invoice-fill-context";
 import { ExportDialog } from "@/components/export-dialog";
 import { FloatingLabelInput } from "@/components/floating-label-input";
 import { InvoiceDateTimeInput } from "@/components/invoice-datetime-input";
@@ -18,6 +19,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { getInvoice, nextInvoiceId, saveInvoice } from "@/lib/db";
+import { formatInvoiceDisplayId } from "@/lib/invoice-id";
+import { pickDummyInvoice } from "@/lib/dummy-invoices";
+import {
+  findFirstInvoiceValidationIssue,
+  focusInvoiceField,
+  INVALID_FIELD_RING,
+} from "@/lib/invoice-validation";
 import {
   formatIqd,
   formatUsd,
@@ -27,6 +35,11 @@ import {
 } from "@/lib/money";
 import { cn, createId } from "@/lib/utils";
 import type { Invoice, InvoiceLine } from "@/lib/types";
+
+const SECTION_TINT =
+  "rounded-xl border bg-sky-50 p-4 dark:bg-sky-950/30";
+const SECTION_PLAIN = "rounded-xl border bg-background p-4";
+const RATE_FIELD_SIZE = "h-11 min-h-11";
 
 function emptyLine(): InvoiceLine {
   return {
@@ -58,10 +71,13 @@ export function InvoiceForm({
   openExportOnMount?: boolean;
 }) {
   const router = useRouter();
-  const { t } = useSettings();
+  const { t, debugMode } = useSettings();
+  const { registerFillHandler } = useDebugInvoiceFill();
+  const dummyIndexRef = useRef(0);
   const [invoice, setInvoice] = useState<Invoice | null>(initial ?? null);
   const [ready, setReady] = useState(Boolean(initial));
   const [error, setError] = useState("");
+  const [invalidFieldId, setInvalidFieldId] = useState("");
   const [saving, setSaving] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
@@ -127,10 +143,47 @@ export function InvoiceForm({
   );
 
   function patch(partial: Partial<Invoice>) {
+    setInvalidFieldId("");
     setInvoice((current) => (current ? { ...current, ...partial } : current));
   }
 
+  const fillDummyData = useCallback(() => {
+    setInvoice((current) => {
+      if (!current) return current;
+
+      const template = pickDummyInvoice(dummyIndexRef.current);
+      dummyIndexRef.current += 1;
+
+      return {
+        ...current,
+        customerName: template.customerName,
+        customerPhone: template.customerPhone,
+        customerAddress: template.customerAddress,
+        exchangeRate: template.exchangeRate,
+        lines: template.lines.map((line) => ({
+          id: createId(),
+          description: line.description,
+          quantity: line.quantity,
+          unitPrice: line.unitPrice,
+        })),
+      };
+    });
+    setError("");
+    setInvalidFieldId("");
+  }, []);
+
+  useEffect(() => {
+    if (!debugMode) {
+      registerFillHandler(null);
+      return;
+    }
+
+    registerFillHandler(fillDummyData);
+    return () => registerFillHandler(null);
+  }, [debugMode, fillDummyData, registerFillHandler]);
+
   function patchLine(id: string, partial: Partial<InvoiceLine>) {
+    setInvalidFieldId("");
     setInvoice((current) =>
       current
         ? {
@@ -146,6 +199,16 @@ export function InvoiceForm({
   async function onSave() {
     if (!invoice) return;
     setError("");
+    setInvalidFieldId("");
+
+    const issue = findFirstInvoiceValidationIssue(invoice);
+    if (issue) {
+      setError(t(issue.messageKey));
+      setInvalidFieldId(issue.fieldId);
+      focusInvoiceField(issue.fieldId);
+      return;
+    }
+
     setSaving(true);
     try {
       const next = { ...invoice, customerName: invoice.customerName.trim() };
@@ -167,6 +230,7 @@ export function InvoiceForm({
       if (found) {
         setInvoice(found);
         setError("");
+        setInvalidFieldId("");
       }
       return;
     }
@@ -174,6 +238,7 @@ export function InvoiceForm({
     const id = await nextInvoiceId();
     setInvoice(emptyInvoice(id));
     setError("");
+    setInvalidFieldId("");
     setReady(true);
   }, [initial]);
 
@@ -196,67 +261,80 @@ export function InvoiceForm({
           <LoadingCircle progress={1} spinning />
         </div>
       ) : (
-        <div className="flex flex-col gap-5">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="invoice-id">{t("invoiceId")}</Label>
-              <ReadOnlyField
-                id="invoice-id"
-                className="flex items-center"
-              >
-                <span className="min-w-0 truncate">{invoice.id}</span>
-              </ReadOnlyField>
+        <div className="flex flex-col">
+          <section className={SECTION_TINT}>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="min-w-0 space-y-1.5">
+                <Label htmlFor="invoice-id">{t("invoiceId")}</Label>
+                <ReadOnlyField
+                  id="invoice-id"
+                  className="flex items-center"
+                >
+                  <span className="min-w-0 truncate">
+                    {formatInvoiceDisplayId(invoice.id)}
+                  </span>
+                </ReadOnlyField>
+              </div>
+              <div className="min-w-0 space-y-1.5">
+                <Label htmlFor="invoice-datetime">{t("dateTime")}</Label>
+                <InvoiceDateTimeInput
+                  id="invoice-datetime"
+                  value={invoice.createdAt}
+                  readOnly
+                />
+              </div>
             </div>
-            <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="invoice-datetime">{t("dateTime")}</Label>
-              <InvoiceDateTimeInput
-                id="invoice-datetime"
-                value={invoice.createdAt}
-                readOnly
-              />
-            </div>
-          </div>
+          </section>
 
-          <Separator />
+          <Separator className="my-5" />
 
-          <FloatingLabelInput
-            id="customer-name"
-            label={t("name")}
-            value={invoice.customerName}
-            onChange={(event) => patch({ customerName: event.target.value })}
-            autoComplete="name"
-          />
+          <section className={cn("space-y-3", SECTION_PLAIN)}>
+            <FloatingLabelInput
+              id="customer-name"
+              label={t("name")}
+              value={invoice.customerName}
+              aria-invalid={invalidFieldId === "customer-name"}
+              className={
+                invalidFieldId === "customer-name" ? INVALID_FIELD_RING : undefined
+              }
+              onChange={(event) => patch({ customerName: event.target.value })}
+              autoComplete="name"
+            />
 
-          <IraqiPhoneInput
-            id="customer-phone"
-            ariaLabel={t("phone")}
-            value={invoice.customerPhone}
-            onChange={(value) => patch({ customerPhone: value })}
-          />
+            <IraqiPhoneInput
+              id="customer-phone"
+              ariaLabel={t("phone")}
+              value={invoice.customerPhone}
+              onChange={(value) => patch({ customerPhone: value })}
+            />
 
-          <FloatingLabelInput
-            id="customer-address"
-            label={t("address")}
-            value={invoice.customerAddress}
-            onChange={(event) =>
-              patch({ customerAddress: event.target.value })
-            }
-            autoComplete="street-address"
-          />
+            <FloatingLabelInput
+              id="customer-address"
+              label={t("address")}
+              value={invoice.customerAddress}
+              onChange={(event) =>
+                patch({ customerAddress: event.target.value })
+              }
+              autoComplete="street-address"
+            />
+          </section>
 
-          <Separator />
+          <Separator className="my-5" />
 
-          <section className="space-y-3">
+          <section className={cn("space-y-3", SECTION_TINT)}>
             <p className="text-base font-medium">{t("items")}</p>
             {invoice.lines.map((line, index) => (
-              <div key={line.id} className="space-y-3 rounded-xl border p-4">
+              <div key={line.id} className="space-y-3 rounded-xl border bg-background p-4">
                 <div className="flex items-center gap-2">
                   <span className="w-7 shrink-0 text-base font-medium tabular-nums text-foreground">
                     #{index + 1}
                   </span>
                   <Input
+                    id={`desc-${line.id}`}
                     className="min-w-0 flex-1"
                     placeholder={t("description")}
+                    required
+                    aria-invalid={invalidFieldId === `desc-${line.id}`}
                     value={line.description}
                     onChange={(event) =>
                       patchLine(line.id, { description: event.target.value })
@@ -283,6 +361,7 @@ export function InvoiceForm({
                     </Label>
                     <NumericInput
                       id={`price-${line.id}`}
+                      aria-invalid={invalidFieldId === `price-${line.id}`}
                       value={line.unitPrice}
                       onValueChange={(unitPrice) =>
                         patchLine(line.id, { unitPrice })
@@ -297,7 +376,7 @@ export function InvoiceForm({
                       id={`total-${line.id}`}
                       readOnly
                       tabIndex={-1}
-                      className="tabular-nums read-only:border-input/70 read-only:bg-muted/70 read-only:text-muted-foreground dark:read-only:bg-input/60"
+                      className="tabular-nums read-only:border-input/70 read-only:bg-background read-only:text-muted-foreground"
                       value={lineTotal(line) || ""}
                     />
                   </div>
@@ -331,7 +410,7 @@ export function InvoiceForm({
             <Button
               type="button"
               variant="outline"
-              className="w-full border-input/60 bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground dark:bg-input/60"
+              className="w-full border-neutral-300 bg-neutral-200 text-neutral-700 hover:bg-neutral-300 hover:text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
               onClick={() => patch({ lines: [...invoice.lines, emptyLine()] })}
             >
               <Plus />
@@ -339,13 +418,16 @@ export function InvoiceForm({
             </Button>
           </section>
 
-          <section className="space-y-3 rounded-xl border p-4">
-            <div className="flex items-center justify-between text-base">
+          <Separator className="my-5" />
+
+          <section className={cn("space-y-3", SECTION_PLAIN)}>
+            <div className="flex items-center justify-between rounded-lg bg-green-100 px-3 py-2 text-base dark:bg-green-950/50">
               <span>{t("grandTotal")}</span>
               <span className="tabular-nums font-medium">
                 {formatUsd(usd)} {t("usd")}
               </span>
             </div>
+
             <div className="space-y-1.5">
               <Label className="font-medium">{t("exchangeRate")}</Label>
               <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_auto_auto] items-center gap-x-2 gap-y-1.5">
@@ -362,20 +444,30 @@ export function InvoiceForm({
                 <ReadOnlyField
                   id="rate-iqd-2"
                   className={cn(
-                    "col-start-3 row-start-2 flex h-9 min-h-9 items-center justify-center border-amber-300 bg-amber-50 px-2 py-0 text-amber-600 hover:bg-amber-100 active:bg-amber-100/80 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-950/60",
+                    "col-start-3 row-start-2 flex items-center justify-center px-2 py-0 text-amber-600",
+                    RATE_FIELD_SIZE,
+                    "border-amber-300 bg-amber-50 hover:bg-amber-100 active:bg-amber-100/80 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-950/60",
                   )}
                   onClick={() =>
                     patch({ exchangeRate: invoice.exchangeRate2 ?? 0 })
                   }
                 >
-                  <span className="w-full text-center text-lg font-semibold leading-none tabular-nums">
+                  <span className="w-full text-center text-xl font-semibold leading-none tabular-nums">
                     {formatIqd(invoice.exchangeRate2 ?? 0)}
                   </span>
                 </ReadOnlyField>
-                <div className="col-start-3 row-start-3 flex h-9 min-h-9 items-center overflow-hidden rounded-xl border border-input bg-transparent focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30">
+                <div
+                  className={cn(
+                    "col-start-3 row-start-3 flex items-center overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+                    RATE_FIELD_SIZE,
+                  )}
+                >
                   <NumericInput
                     id="rate-iqd"
-                    className="h-9 min-h-9 w-full border-0 bg-transparent px-2 py-0 text-center text-lg font-semibold leading-none shadow-none focus-visible:border-transparent focus-visible:ring-0"
+                    className={cn(
+                      "w-full border-0 bg-transparent px-2 py-0 text-center text-xl font-semibold leading-none shadow-none focus-visible:border-transparent focus-visible:ring-0",
+                      RATE_FIELD_SIZE,
+                    )}
                     integer
                     value={invoice.exchangeRate}
                     onValueChange={(exchangeRate) => patch({ exchangeRate })}
@@ -383,7 +475,8 @@ export function InvoiceForm({
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between text-base font-semibold">
+
+            <div className="flex items-center justify-between rounded-lg bg-amber-100 px-3 py-2 text-base font-semibold dark:bg-amber-950/50">
               <span>{t("iqdTotal")}</span>
               <span className="tabular-nums">
                 {formatIqd(iqd)} {t("iqd")}
@@ -391,7 +484,9 @@ export function InvoiceForm({
             </div>
           </section>
 
-          {error ? <p className="text-base text-destructive">{error}</p> : null}
+          {error ? (
+            <p className="mt-5 text-base text-destructive">{error}</p>
+          ) : null}
         </div>
       )}
 

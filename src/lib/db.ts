@@ -25,6 +25,34 @@ class WaslDB extends Dexie {
       invoices: "id, createdAt",
       settings: "id",
     });
+    this.version(5)
+      .stores({
+        invoices: "id, createdAt",
+        settings: "id",
+      })
+      .upgrade(async (tx) => {
+        const settings = await tx.table("settings").get("settings");
+        if (!settings) return;
+        await tx.table("settings").put({
+          ...settings,
+          companyName: settings.companyName ?? "Wasl",
+          companyPhone: settings.companyPhone ?? "",
+          companyEmail: settings.companyEmail ?? "",
+        });
+      });
+    this.version(6)
+      .stores({
+        invoices: "id, createdAt",
+        settings: "id",
+      })
+      .upgrade(async (tx) => {
+        const settings = await tx.table("settings").get("settings");
+        if (!settings) return;
+        await tx.table("settings").put({
+          ...settings,
+          companySignature: settings.companySignature ?? null,
+        });
+      });
   }
 }
 
@@ -52,7 +80,12 @@ async function withDb<T>(fallback: T, run: (database: WaslDB) => Promise<T>) {
 const DEFAULT_SETTINGS: AppSettings = {
   id: "settings",
   language: "en",
+  companyName: "Wasl",
+  companyPhone: "",
+  companyEmail: "",
   companyLogo: null,
+  companySignature: null,
+  debugMode: false,
 };
 
 export async function getSettings(): Promise<AppSettings> {
@@ -81,6 +114,10 @@ export async function setLanguage(language: Locale) {
 
 export async function setCompanyLogo(companyLogo: string | null) {
   return updateSettings({ companyLogo });
+}
+
+export async function setDebugMode(debugMode: boolean) {
+  return updateSettings({ debugMode });
 }
 
 export async function nextInvoiceId(): Promise<string> {

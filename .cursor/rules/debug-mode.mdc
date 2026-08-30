@@ -1,0 +1,29 @@
+---
+description: Wasl developer mode — toggle and sample-data UI
+alwaysApply: true
+---
+
+# Developer mode
+
+When the user says **"developer mode on"**, **"debug mode on"**, or similar:
+
+1. Run `npm run debug:on`
+2. Tell them to restart the dev server if it is running
+3. Confirm: Settings → Appearance → **Developer mode**, and the 🤪 button on invoices
+
+When the user says **"developer mode off"**, **"debug mode off"**, or similar:
+
+1. Run `npm run debug:off`
+2. Confirm normal UI is restored
+
+Do **not** warn about push or deploy — `npm run build` automatically runs `debug:off` first.
+
+## Commands
+
+| Command | Effect |
+|---------|--------|
+| `npm run debug:on` | Creates `.wasl-debug`, sets `NEXT_PUBLIC_WASL_DEBUG=1` in `.env.local` |
+| `npm run debug:off` | Removes marker, sets env to `0` |
+| `npm run debug:status` | Prints current state |
+
+In-app toggle: Settings → Appearance → **Developer mode** (syncs with `.wasl-debug` via API).

@@ -146,6 +146,7 @@
   font-family: var(--font-sans);
 }
 
-.invoice-a4[dir="rtl"] {
+.invoice-a4[dir="rtl"],
+.invoice-a4-rtl {
   font-family: var(--font-arabic), var(--font-sans);
 }

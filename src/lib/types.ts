@@ -21,14 +21,25 @@ export type Invoice = {
 export type AppSettings = {
   id: "settings";
   language: Locale;
+  companyName: string;
+  companyPhone: string;
+  companyEmail: string;
   companyLogo: string | null;
+  companySignature: string | null;
+  debugMode: boolean;
 };
 
 export const LOCALES: Locale[] = ["en", "ckb", "ar"];
 export const RTL_LOCALES: Locale[] = ["ckb", "ar"];
 
-export const LANGUAGE_OPTIONS: { locale: Locale; label: string }[] = [
-  { locale: "en", label: "English" },
-  { locale: "ckb", label: "کوردی (سۆرانی)" },
-  { locale: "ar", label: "العربية" },
+export type LanguageFlagId = "en" | "kurdistan" | "iraq";
+
+export const LANGUAGE_OPTIONS: {
+  locale: Locale;
+  label: string;
+  flag: LanguageFlagId;
+}[] = [
+  { locale: "en", label: "English", flag: "en" },
+  { locale: "ckb", label: "کوردی (سۆرانی)", flag: "kurdistan" },
+  { locale: "ar", label: "العربية", flag: "iraq" },
 ];

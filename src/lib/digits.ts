@@ -44,6 +44,11 @@ export function formatWesternNumber(value: number): string {
   return String(value);
 }
 
+export function isPartialDecimalInput(value: string): boolean {
+  const normalized = toWesternDigits(value.trim());
+  return normalized === "" || /^\d*\.?\d*$/.test(normalized);
+}
+
 export function formatCommaInteger(value: number): string {
   if (!Number.isFinite(value) || value === 0) return "";
   return new Intl.NumberFormat("en-US", {

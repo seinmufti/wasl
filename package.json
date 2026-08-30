@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "next build",
+    "build": "node scripts/debug-mode.mjs off && next build",
     "start": "node scripts/start.mjs",
-    "lint": "eslint"
+    "lint": "eslint",
+    "debug:on": "node scripts/debug-mode.mjs on",
+    "debug:off": "node scripts/debug-mode.mjs off",
+    "debug:status": "node scripts/debug-mode.mjs status"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Plus } from "lucide-react";
+import { Home, Plus, User } from "lucide-react";
 import { useSettings } from "@/components/settings-provider";
 import { cn } from "@/lib/utils";
 
 export function isTabRoute(pathname: string) {
-  return pathname === "/";
+  return pathname === "/" || pathname === "/profile";
 }
 
 export function BottomNav() {
@@ -37,7 +37,12 @@ export function BottomNav() {
             {t("createInvoice")}
           </span>
         </Link>
-        <span className="py-2.5" aria-hidden />
+        <NavItem
+          href="/profile"
+          active={pathname === "/profile"}
+          icon={<User className="size-6" />}
+          label={t("profile")}
+        />
       </div>
     </nav>
   );

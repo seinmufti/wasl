@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import {
   formatCommaInteger,
   formatWesternNumber,
+  isPartialDecimalInput,
   parseWesternInteger,
   parseWesternNumber,
 } from "@/lib/digits";
@@ -29,11 +30,14 @@ export function NumericInput({
   const format = integer ? formatCommaInteger : formatWesternNumber;
   const parse = integer ? parseWesternInteger : parseWesternNumber;
   const [showEmpty, setShowEmpty] = useState(false);
+  const [editingText, setEditingText] = useState<string | null>(null);
 
   const display =
-    showEmpty && clearOnFocusWhen !== undefined && value === clearOnFocusWhen
-      ? ""
-      : format(value);
+    editingText !== null
+      ? editingText
+      : showEmpty && clearOnFocusWhen !== undefined && value === clearOnFocusWhen
+        ? ""
+        : format(value);
 
   return (
     <Input
@@ -44,21 +48,35 @@ export function NumericInput({
       className={cn("tabular-nums", className)}
       value={display}
       onFocus={(event) => {
-        if (clearOnFocusWhen !== undefined && value === clearOnFocusWhen) {
+        if (!integer) {
+          setEditingText(
+            clearOnFocusWhen !== undefined && value === clearOnFocusWhen
+              ? ""
+              : format(value),
+          );
+        } else if (clearOnFocusWhen !== undefined && value === clearOnFocusWhen) {
           setShowEmpty(true);
         }
         onFocus?.(event);
       }}
       onBlur={(event) => {
         setShowEmpty(false);
+        setEditingText(null);
         if (clearOnFocusWhen !== undefined && value === 0) {
           onValueChange(clearOnFocusWhen);
         }
         onBlur?.(event);
       }}
       onChange={(event) => {
+        const next = event.target.value;
+        if (!integer) {
+          if (!isPartialDecimalInput(next)) return;
+          setEditingText(next);
+          onValueChange(parse(next));
+          return;
+        }
         setShowEmpty(false);
-        onValueChange(parse(event.target.value));
+        onValueChange(parse(next));
       }}
     />
   );

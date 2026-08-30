@@ -22,7 +22,7 @@ export function FloatingLabelInput({
   return (
     <div
       className={cn(
-        "relative h-14 min-h-14 min-w-0 overflow-hidden rounded-xl border border-input bg-transparent transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30",
+        "relative h-14 min-h-14 min-w-0 overflow-hidden rounded-xl border border-input bg-background transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
         className,
       )}
       onMouseDown={(event) => {

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { deleteInvoice, listInvoices } from "@/lib/db";
+import { formatInvoiceDisplayId } from "@/lib/invoice-id";
 import {
   formatDate,
   formatIqd,
@@ -104,7 +105,9 @@ export default function HomePage() {
                 href={`/invoice/${invoice.id}`}
                 className="min-w-0 flex-1 p-4"
               >
-                <p className="text-base font-medium">{invoice.id}</p>
+                <p className="text-base font-medium">
+                  {formatInvoiceDisplayId(invoice.id)}
+                </p>
                 <p className="mt-1 truncate text-base">{invoice.customerName}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {formatDate(invoice.createdAt, language)}
@@ -142,7 +145,7 @@ export default function HomePage() {
               {deleteTarget ? (
                 <>
                   <span className="font-medium text-foreground">
-                    {deleteTarget.id}
+                    {formatInvoiceDisplayId(deleteTarget.id)}
                   </span>
                   {" — "}
                   {t("deleteInvoiceConfirm")}

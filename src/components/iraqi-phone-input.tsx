@@ -112,7 +112,7 @@ export function IraqiPhoneInput({
   return (
     <div
       className={cn(
-        "flex h-14 min-h-14 w-full overflow-hidden rounded-xl border border-input bg-transparent transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30",
+        "flex h-14 min-h-14 w-full overflow-hidden rounded-xl border border-input bg-background transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
         disabled && "pointer-events-none opacity-50",
         className,
       )}

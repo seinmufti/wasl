@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { ArrowLeft, Settings } from "lucide-react";
 import { BottomNav, isTabRoute } from "@/components/bottom-nav";
-import { CompanyMark } from "@/components/company-mark";
 import { NordlysLogo } from "@/components/nordlys-logo";
 import { WaslLogo } from "@/components/wasl-logo";
 import { ScrollToTop } from "@/components/scroll-to-top";
@@ -24,39 +23,36 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
-import { fileToDataUrl } from "@/lib/export";
+import { phoneShellSizeClass } from "@/lib/phone-shell";
 import { LANGUAGE_OPTIONS } from "@/lib/types";
+import { useDebugInvoiceFill } from "@/components/debug-invoice-fill-context";
+import { LanguageFlag } from "@/components/language-flag";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { t, language, setLanguage, companyLogo, setCompanyLogo, dir } =
-    useSettings();
+  const { t, language, setLanguage, debugMode, setDebugMode, dir } = useSettings();
   const pathname = usePathname();
   const showBack = !isTabRoute(pathname);
   const isHome = pathname === "/";
   const pageTitle = t(pageTitleKey(pathname));
+  const isInvoiceForm =
+    pathname === "/new" || pathname.startsWith("/invoice/");
+  const { canFill, triggerDummyFill } = useDebugInvoiceFill();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const isDark = (theme ?? resolvedTheme) === "dark";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  async function onLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    const dataUrl = await fileToDataUrl(file);
-    await setCompanyLogo(dataUrl);
-  }
-
   return (
-    <div className="h-dvh overflow-hidden bg-muted">
+    <div className="flex h-dvh w-full items-center justify-center overflow-hidden bg-muted">
       <ScrollToTop />
-      <div className="mx-auto flex h-dvh w-full max-w-[430px] flex-col bg-background shadow-sm">
-        <header className="z-20 grid h-14 shrink-0 grid-cols-[auto_1fr_3rem] items-center border-b border-primary-foreground/10 bg-primary px-4 text-primary-foreground">
+      <div
+        className={`mx-auto flex flex-col overflow-hidden bg-background shadow-sm ${phoneShellSizeClass}`}
+      >
+        <header className="z-20 grid h-14 shrink-0 grid-cols-[auto_1fr_auto] items-center border-b border-primary-foreground/10 bg-primary px-4 text-primary-foreground">
           {showBack ? (
             <Button
               variant="ghost"
@@ -76,16 +72,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <h1 className="truncate text-center text-lg font-semibold tracking-tight">
             {pageTitle}
           </h1>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="justify-self-end text-primary-foreground hover:bg-primary-foreground/10"
-            aria-label={t("settings")}
-            onClick={() => setOpen(true)}
-          >
-            <Settings className="size-6" />
-          </Button>
+          <div className="flex items-center justify-self-end gap-0.5">
+            {debugMode && isInvoiceForm && canFill ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-lg text-primary-foreground hover:bg-primary-foreground/10"
+                aria-label={t("fillDummyData")}
+                onClick={triggerDummyFill}
+              >
+                🤪
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+              aria-label={t("settings")}
+              onClick={() => setOpen(true)}
+            >
+              <Settings className="size-6" />
+            </Button>
+          </div>
         </header>
 
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -98,44 +108,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={dir === "rtl" ? "left" : "right"}
-          className="w-[min(100%,20rem)]"
+          className="w-[min(100%,20rem)] gap-0 overflow-hidden p-0"
           showCloseButton
         >
-          <SheetHeader>
+          <SheetHeader className="shrink-0">
             <SheetTitle>{t("settings")}</SheetTitle>
             <SheetDescription>{t("appName")}</SheetDescription>
           </SheetHeader>
 
-          <div className="flex flex-1 flex-col gap-6 px-4">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="flex flex-col gap-6 px-4 py-4">
             <section className="space-y-3">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {t("appearance")}
+                {t("language")}
               </p>
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="dark-mode">{t("darkMode")}</Label>
-                <Switch
-                  id="dark-mode"
-                  checked={mounted && isDark}
-                  onCheckedChange={(checked) =>
-                    setTheme(checked ? "dark" : "light")
-                  }
-                />
-              </div>
-            </section>
-
-            <Separator />
-
-            <section className="space-y-3">
-              <Label>{t("language")}</Label>
               <div className="grid gap-2">
-                {LANGUAGE_OPTIONS.map(({ locale, label }) => (
+                {LANGUAGE_OPTIONS.map(({ locale, label, flag }) => (
                   <Button
                     key={locale}
                     type="button"
                     variant={language === locale ? "default" : "outline"}
-                    className="w-full"
+                    className="w-full justify-start gap-2"
                     onClick={() => setLanguage(locale)}
                   >
+                    <LanguageFlag flag={flag} />
                     {label}
                   </Button>
                 ))}
@@ -144,53 +140,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             <Separator />
 
-            <section className="space-y-3">
-              <Label>{t("companyLogo")}</Label>
-              <div className="flex items-center gap-3">
-                {companyLogo ? (
-                  <CompanyMark
-                    src={companyLogo}
-                    imgClassName="size-12 rounded-lg border"
-                    className="size-12"
-                  />
-                ) : (
-                  <div
-                    className="size-12 shrink-0 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30"
-                    aria-hidden
-                  />
-                )}
-                <div className="flex flex-col gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    {t("uploadLogo")}
-                  </Button>
-                  {companyLogo ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCompanyLogo(null)}
-                    >
-                      {t("removeLogo")}
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={onLogoChange}
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="dark-mode">{t("darkMode")}</Label>
+              <Switch
+                id="dark-mode"
+                checked={mounted && isDark}
+                onCheckedChange={(checked) =>
+                  setTheme(checked ? "dark" : "light")
+                }
               />
-            </section>
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="developer-mode">{t("developerMode")}</Label>
+              <Switch
+                id="developer-mode"
+                checked={debugMode}
+                onCheckedChange={(checked) => setDebugMode(checked)}
+              />
+            </div>
+            </div>
           </div>
 
-          <SheetFooter className="border-t">
+          <SheetFooter className="mt-0 shrink-0 border-t">
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <NordlysLogo />
               <span>{t("developedBy")}</span>
