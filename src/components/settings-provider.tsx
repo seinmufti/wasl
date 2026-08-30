@@ -31,12 +31,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    getSettings().then((settings) => {
-      if (cancelled) return;
-      setLanguageState(settings.language);
-      setLogoState(settings.companyLogo);
-      setReady(true);
-    });
+    getSettings()
+      .then((settings) => {
+        if (cancelled) return;
+        setLanguageState(settings.language);
+        setLogoState(settings.companyLogo);
+        setReady(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setReady(true);
+      });
     return () => {
       cancelled = true;
     };

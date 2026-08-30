@@ -10,8 +10,14 @@ export function grandTotalUsd(invoice: Pick<Invoice, "lines">): number {
   return invoice.lines.reduce((sum, line) => sum + lineTotal(line), 0);
 }
 
+export const EXCHANGE_RATE_USD_BASE = 100;
+
+export function iqdPerUsd(exchangeRate: number): number {
+  return (Number(exchangeRate) || 0) / EXCHANGE_RATE_USD_BASE;
+}
+
 export function grandTotalIqd(invoice: Pick<Invoice, "lines" | "exchangeRate">): number {
-  return grandTotalUsd(invoice) * (Number(invoice.exchangeRate) || 0);
+  return grandTotalUsd(invoice) * iqdPerUsd(invoice.exchangeRate);
 }
 
 export function formatUsd(value: number): string {

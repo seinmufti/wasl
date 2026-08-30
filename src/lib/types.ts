@@ -15,6 +15,7 @@ export type Invoice = {
   customerAddress: string;
   lines: InvoiceLine[];
   exchangeRate: number;
+  exchangeRate2: number;
 };
 
 export type AppSettings = {
@@ -25,3 +26,9 @@ export type AppSettings = {
 
 export const LOCALES: Locale[] = ["en", "ckb", "ar"];
 export const RTL_LOCALES: Locale[] = ["ckb", "ar"];
+
+export const LANGUAGE_OPTIONS: { locale: Locale; label: string }[] = [
+  { locale: "en", label: "English" },
+  { locale: "ckb", label: "کوردی (سۆرانی)" },
+  { locale: "ar", label: "العربية" },
+];

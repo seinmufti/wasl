@@ -1,4 +1,3 @@
-import { WaslLogo } from "@/components/wasl-logo";
 import { cn } from "@/lib/utils";
 
 export function CompanyMark({
@@ -10,16 +9,14 @@ export function CompanyMark({
   className?: string;
   imgClassName?: string;
 }) {
-  if (src) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt=""
-        className={cn("size-8 shrink-0 rounded-md object-contain", imgClassName)}
-      />
-    );
-  }
+  if (!src) return null;
 
-  return <WaslLogo className={className} />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      className={cn("h-9 w-9 shrink-0 rounded-md object-contain", imgClassName, className)}
+    />
+  );
 }

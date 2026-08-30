@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use, useEffect, useState } from "react";
+import { Suspense, use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { InvoiceForm } from "@/components/invoice-form";
@@ -16,8 +16,23 @@ function InvoicePageInner({ id }: { id: string }) {
   const searchParams = useSearchParams();
   const [invoice, setInvoice] = useState<Invoice | null | undefined>(undefined);
 
+  const reloadInvoice = useCallback(async () => {
+    const found = await getInvoice(id);
+    setInvoice(found ?? null);
+  }, [id]);
+
   useEffect(() => {
-    getInvoice(id).then((found) => setInvoice(found ?? null));
+    let cancelled = false;
+    getInvoice(id)
+      .then((found) => {
+        if (!cancelled) setInvoice(found ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setInvoice(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (invoice === undefined) {
@@ -27,15 +42,14 @@ function InvoicePageInner({ id }: { id: string }) {
   if (invoice === null) {
     return (
       <PageShell
-        title={t("invoice")}
-        backHref="/"
+        onRefresh={reloadInvoice}
         footer={
-          <Button asChild className="h-11 w-full" variant="outline">
+          <Button asChild className="w-full" variant="outline">
             <Link href="/">{t("back")}</Link>
           </Button>
         }
       >
-        <div className="flex min-h-[12rem] items-center justify-center text-sm text-muted-foreground">
+        <div className="flex min-h-[14rem] items-center justify-center text-base text-muted-foreground">
           {t("noInvoices")}
         </div>
       </PageShell>

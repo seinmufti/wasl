@@ -11,11 +11,15 @@ export type MessageKey =
   | "removeLogo"
   | "developedBy"
   | "createInvoice"
+  | "createNewInvoice"
+  | "home"
   | "invoices"
   | "noInvoices"
   | "noInvoicesHint"
   | "invoiceId"
+  | "dateTime"
   | "customerName"
+  | "name"
   | "phone"
   | "address"
   | "description"
@@ -65,11 +69,15 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     removeLogo: "Remove",
     developedBy: "Developed by Nordlys",
     createInvoice: "Create invoice",
+    createNewInvoice: "Create New Invoice",
+    home: "Home",
     invoices: "Invoices",
     noInvoices: "No invoices yet",
     noInvoicesHint: "Create your first invoice to store it on this device.",
     invoiceId: "Invoice ID",
+    dateTime: "Date & time",
     customerName: "Customer name",
+    name: "Name",
     phone: "Phone number",
     address: "Address",
     description: "Description",
@@ -79,7 +87,7 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     addRow: "Add row",
     removeRow: "Remove",
     grandTotal: "Grand total",
-    exchangeRate: "USD to IQD today",
+    exchangeRate: "USD/IQD Exch. Rate",
     iqdTotal: "Total in IQD",
     save: "Save",
     saving: "Saving…",
@@ -99,7 +107,7 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     customer: "Customer",
     usd: "USD",
     iqd: "IQD",
-    items: "Items",
+    items: "Rows",
     thankYou: "Thank you for your business.",
     companyName: "Wasl",
     deleteInvoice: "Delete invoice",
@@ -118,11 +126,15 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     removeLogo: "سڕینەوە",
     developedBy: "پەرەپێدراوە لەلایەن نۆردلیس",
     createInvoice: "دروستکردنی پسوڵە",
+    createNewInvoice: "دروستکردنی پسوڵەی نوێ",
+    home: "سەرەکی",
     invoices: "پسوڵەکان",
     noInvoices: "هیچ پسوڵەیەک نییە",
     noInvoicesHint: "یەکەم پسوڵە دروست بکە بۆ پاشەکەوتکردن لەسەر ئەم ئامێرە.",
     invoiceId: "ژمارەی پسوڵە",
+    dateTime: "بەروار و کات",
     customerName: "ناوی کڕیار",
+    name: "ناو",
     phone: "ژمارەی تەلەفۆن",
     address: "ناونیشان",
     description: "وەسف",
@@ -132,7 +144,7 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     addRow: "زیادکردنی ڕیز",
     removeRow: "سڕینەوە",
     grandTotal: "کۆی گشتی",
-    exchangeRate: "نرخی ئەمڕۆی دۆلار بۆ دینار",
+    exchangeRate: "نرخی گۆڕینی USD/IQD",
     iqdTotal: "کۆی دینار",
     save: "پاشەکەوتکردن",
     saving: "پاشەکەوت دەکرێت…",
@@ -152,7 +164,7 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     customer: "کڕیار",
     usd: "دۆلار",
     iqd: "دینار",
-    items: "کاڵاکان",
+    items: "ڕیزەکان",
     thankYou: "سوپاس بۆ مامەڵەکەتان.",
     companyName: "وەسڵ",
     deleteInvoice: "سڕینەوەی پسوڵە",
@@ -171,11 +183,15 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     removeLogo: "إزالة",
     developedBy: "طوّر بواسطة نوردليس",
     createInvoice: "إنشاء فاتورة",
+    createNewInvoice: "إنشاء فاتورة جديدة",
+    home: "الرئيسية",
     invoices: "الفواتير",
     noInvoices: "لا توجد فواتير بعد",
     noInvoicesHint: "أنشئ فاتورتك الأولى لحفظها على هذا الجهاز.",
     invoiceId: "رقم الفاتورة",
+    dateTime: "التاريخ والوقت",
     customerName: "اسم الزبون",
+    name: "الاسم",
     phone: "رقم الهاتف",
     address: "العنوان",
     description: "الوصف",
@@ -185,7 +201,7 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     addRow: "إضافة صف",
     removeRow: "حذف",
     grandTotal: "المجموع الكلي",
-    exchangeRate: "سعر صرف الدولار إلى الدينار اليوم",
+    exchangeRate: "سعر صرف USD/IQD",
     iqdTotal: "المجموع بالدينار",
     save: "حفظ",
     saving: "جارٍ الحفظ…",
@@ -205,7 +221,7 @@ export const dictionaries: Record<Locale, Record<MessageKey, string>> = {
     customer: "الزبون",
     usd: "دولار",
     iqd: "دينار",
-    items: "البنود",
+    items: "الصفوف",
     thankYou: "شكرًا لتعاملكم معنا.",
     companyName: "وصل",
     deleteInvoice: "حذف الفاتورة",

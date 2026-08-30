@@ -1,7 +1,10 @@
 import { CompanyMark } from "@/components/company-mark";
+import { WaslLogo } from "@/components/wasl-logo";
 import { isRtl, t } from "@/lib/i18n";
+import { formatInvoiceDateTime } from "@/lib/datetime";
+import { formatPhoneDisplay } from "@/lib/phone";
 import {
-  formatDate,
+  EXCHANGE_RATE_USD_BASE,
   formatIqd,
   formatUsd,
   grandTotalIqd,
@@ -32,11 +35,15 @@ export function InvoiceExport({
     >
       <header className="flex items-start justify-between gap-6 border-b border-neutral-200 pb-5">
         <div className="flex items-center gap-3">
-          <CompanyMark
-            src={companyLogo}
-            className="size-12"
-            imgClassName="size-12 rounded-lg object-contain"
-          />
+          {companyLogo ? (
+            <CompanyMark
+              src={companyLogo}
+              className="size-12"
+              imgClassName="size-12 rounded-lg object-contain"
+            />
+          ) : (
+            <WaslLogo className="h-12" />
+          )}
           <div>
             <p className="text-xl font-semibold tracking-tight">{label("appName")}</p>
             <p className="text-sm text-neutral-500">{label("invoice")}</p>
@@ -47,7 +54,7 @@ export function InvoiceExport({
             {label("invoiceId")}: {invoice.id}
           </p>
           <p className="text-neutral-500">
-            {label("date")}: {formatDate(invoice.createdAt, locale)}
+            {label("dateTime")}: {formatInvoiceDateTime(invoice.createdAt)}
           </p>
         </div>
       </header>
@@ -57,7 +64,9 @@ export function InvoiceExport({
           {label("customer")}
         </p>
         <p className="text-base font-medium">{invoice.customerName}</p>
-        {invoice.customerPhone ? <p>{invoice.customerPhone}</p> : null}
+        {invoice.customerPhone ? (
+          <p>{formatPhoneDisplay(invoice.customerPhone)}</p>
+        ) : null}
         {invoice.customerAddress ? (
           <p className="whitespace-pre-wrap text-neutral-700">
             {invoice.customerAddress}
@@ -110,7 +119,10 @@ export function InvoiceExport({
         </div>
         <div className="flex items-center justify-between text-neutral-600">
           <span>{label("exchangeRate")}</span>
-          <span className="tabular-nums">{formatIqd(invoice.exchangeRate)}</span>
+          <span className="tabular-nums">
+            {EXCHANGE_RATE_USD_BASE} {label("usd")} = {formatIqd(invoice.exchangeRate)}{" "}
+            {label("iqd")}
+          </span>
         </div>
         <div className="flex items-center justify-between text-base font-semibold">
           <span>

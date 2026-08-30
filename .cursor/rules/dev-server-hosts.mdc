@@ -1,0 +1,35 @@
+---
+description: Always show local and network host URLs when starting or restarting Wasl
+alwaysApply: true
+---
+
+# Dev server host banner
+
+When starting or restarting Wasl (`npm run dev` or `npm run start`), **always** report the full host banner to the user — never only `localhost`.
+
+Read the startup output from `scripts/host-banner.mjs` (or the terminal after restart) and include **all four URLs**:
+
+**Local**
+- Frontend: `http://localhost:{port}`
+- Backend: `http://localhost:{port}/api`
+
+**Network**
+- Frontend: `http://{lan-ip}:{port}`
+- Backend: `http://{lan-ip}:{port}/api`
+
+Notes:
+- One process serves both frontend and backend (Next.js on `HOST=0.0.0.0` by default).
+- For mobile/LAN testing, highlight the **Network → Frontend** URL.
+- If restart fails with `EADDRINUSE`, free port 3000 first, then restart and show the banner again.
+
+Example response after restart:
+
+```
+Local:
+  Frontend: http://localhost:3000
+  Backend:  http://localhost:3000/api
+
+Network:
+  Frontend: http://192.168.0.199:3000
+  Backend:  http://192.168.0.199:3000/api
+```

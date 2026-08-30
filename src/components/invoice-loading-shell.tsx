@@ -1,6 +1,6 @@
 "use client";
 
-import { InvoiceFormSkeleton } from "@/components/invoice-form-skeleton";
+import { LoadingCircle } from "@/components/pull-to-refresh";
 import { PageShell } from "@/components/page-shell";
 import { useSettings } from "@/components/settings-provider";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,18 @@ export function InvoiceLoadingShell() {
 
   return (
     <PageShell
-      title={t("invoice")}
-      backHref="/"
       footer={
-        <div className="grid grid-cols-2 gap-2">
-          <Button className="h-11" disabled>
-            {t("save")}
-          </Button>
-          <Button className="h-11" variant="outline" disabled>
+        <div className="grid grid-cols-2 gap-3">
+          <Button disabled>{t("save")}</Button>
+          <Button variant="outline" disabled>
             {t("export")}
           </Button>
         </div>
       }
     >
-      <InvoiceFormSkeleton />
+      <div className="flex justify-center py-16">
+        <LoadingCircle progress={1} spinning />
+      </div>
     </PageShell>
   );
 }

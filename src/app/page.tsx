@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
-import { InvoiceListSkeleton } from "@/components/invoice-list-skeleton";
+import { LoadingCircle } from "@/components/pull-to-refresh";
 import { PageShell } from "@/components/page-shell";
 import { useSettings } from "@/components/settings-provider";
 import {
@@ -33,8 +33,23 @@ export default function HomePage() {
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const loadInvoices = useCallback(async () => {
+    const items = await listInvoices();
+    setInvoices(items);
+  }, []);
+
   useEffect(() => {
-    listInvoices().then(setInvoices);
+    let cancelled = false;
+    listInvoices()
+      .then((items) => {
+        if (!cancelled) setInvoices(items);
+      })
+      .catch(() => {
+        if (!cancelled) setInvoices([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function confirmDelete() {
@@ -53,27 +68,33 @@ export default function HomePage() {
 
   return (
     <PageShell
-      title={t("invoices")}
-      footer={
-        <Button asChild className="h-11 w-full">
-          <Link href="/new">
-            <Plus />
-            {t("createInvoice")}
-          </Link>
-        </Button>
-      }
+      onRefresh={async () => {
+        try {
+          await loadInvoices();
+        } catch {
+          setInvoices([]);
+        }
+      }}
     >
       {invoices === null ? (
-        <InvoiceListSkeleton />
+        <div className="flex justify-center py-16">
+          <LoadingCircle progress={1} spinning />
+        </div>
       ) : invoices.length === 0 ? (
-        <div className="flex min-h-[12rem] flex-col items-center justify-center gap-2 py-12 text-center">
-          <p className="font-medium">{t("noInvoices")}</p>
-          <p className="max-w-[16rem] text-sm text-muted-foreground">
+        <div className="flex min-h-[14rem] flex-col items-center justify-center gap-3 py-12 text-center">
+          <p className="text-lg font-medium">{t("noInvoices")}</p>
+          <p className="max-w-[18rem] text-base text-muted-foreground">
             {t("noInvoicesHint")}
           </p>
+          <Button asChild size="lg" className="mt-2">
+            <Link href="/new">
+              <Plus />
+              {t("createNewInvoice")}
+            </Link>
+          </Button>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {invoices.map((invoice) => (
             <li
               key={invoice.id}
@@ -81,16 +102,14 @@ export default function HomePage() {
             >
               <Link
                 href={`/invoice/${invoice.id}`}
-                className="min-w-0 flex-1 p-3"
+                className="min-w-0 flex-1 p-4"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium">{invoice.id}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDate(invoice.createdAt, language)}
-                  </p>
-                </div>
-                <p className="mt-1 truncate text-sm">{invoice.customerName}</p>
-                <p className="mt-1 text-xs text-muted-foreground tabular-nums">
+                <p className="text-base font-medium">{invoice.id}</p>
+                <p className="mt-1 truncate text-base">{invoice.customerName}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {formatDate(invoice.createdAt, language)}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground tabular-nums">
                   {formatUsd(grandTotalUsd(invoice))} {t("usd")} ·{" "}
                   {formatIqd(grandTotalIqd(invoice))} {t("iqd")}
                 </p>
@@ -103,7 +122,7 @@ export default function HomePage() {
                 aria-label={t("deleteInvoice")}
                 onClick={() => setDeleteTarget(invoice)}
               >
-                <Trash2 className="size-4" />
+                <Trash2 className="size-5" />
               </Button>
             </li>
           ))}

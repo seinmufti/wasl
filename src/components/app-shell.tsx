@@ -1,23 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Settings } from "lucide-react";
-import { WaslLogo } from "@/components/wasl-logo";
+import { ArrowLeft, Settings } from "lucide-react";
+import { BottomNav, isTabRoute } from "@/components/bottom-nav";
 import { CompanyMark } from "@/components/company-mark";
 import { NordlysLogo } from "@/components/nordlys-logo";
+import { WaslLogo } from "@/components/wasl-logo";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { useSettings } from "@/components/settings-provider";
+import { pageTitleKey } from "@/lib/page-title";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -28,11 +25,15 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { fileToDataUrl } from "@/lib/export";
-import { LOCALES, type Locale } from "@/lib/types";
+import { LANGUAGE_OPTIONS } from "@/lib/types";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { t, language, setLanguage, companyLogo, setCompanyLogo, dir } =
     useSettings();
+  const pathname = usePathname();
+  const showBack = !isTabRoute(pathname);
+  const isHome = pathname === "/";
+  const pageTitle = t(pageTitleKey(pathname));
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -55,33 +56,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="h-dvh overflow-hidden bg-muted">
       <ScrollToTop />
       <div className="mx-auto flex h-dvh w-full max-w-[430px] flex-col bg-background shadow-sm">
-        <header className="z-20 grid h-12 shrink-0 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b bg-background px-3">
+        <header className="z-20 grid h-14 shrink-0 grid-cols-[auto_1fr_3rem] items-center border-b border-primary-foreground/10 bg-primary px-4 text-primary-foreground">
+          {showBack ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+              asChild
+            >
+              <Link href="/" aria-label={t("back")}>
+                <ArrowLeft className="size-6 rtl:rotate-180" />
+              </Link>
+            </Button>
+          ) : isHome ? (
+            <WaslLogo inverted className="h-9" />
+          ) : (
+            <span className="size-11 shrink-0" aria-hidden />
+          )}
+          <h1 className="truncate text-center text-lg font-semibold tracking-tight">
+            {pageTitle}
+          </h1>
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            className="justify-self-end text-primary-foreground hover:bg-primary-foreground/10"
             aria-label={t("settings")}
             onClick={() => setOpen(true)}
           >
-            <Settings className="size-5" />
+            <Settings className="size-6" />
           </Button>
-          <div className="flex items-center justify-center gap-2">
-            <WaslLogo />
-            <span className="text-base font-semibold tracking-tight">
-              {t("appName")}
-            </span>
-          </div>
-          <span className="size-10 shrink-0" aria-hidden />
         </header>
 
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {children}
         </main>
+
+        <BottomNav />
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
-          side={dir === "rtl" ? "right" : "left"}
+          side={dir === "rtl" ? "left" : "right"}
           className="w-[min(100%,20rem)]"
           showCloseButton
         >
@@ -110,26 +126,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Separator />
 
             <section className="space-y-3">
-              <Label htmlFor="language">{t("language")}</Label>
-              <Select
-                value={language}
-                onValueChange={(value) => setLanguage(value as Locale)}
-              >
-                <SelectTrigger id="language" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  {LOCALES.map((locale) => (
-                    <SelectItem key={locale} value={locale}>
-                      {locale === "en"
-                        ? t("english")
-                        : locale === "ckb"
-                          ? t("kurdish")
-                          : t("arabic")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>{t("language")}</Label>
+              <div className="grid gap-2">
+                {LANGUAGE_OPTIONS.map(({ locale, label }) => (
+                  <Button
+                    key={locale}
+                    type="button"
+                    variant={language === locale ? "default" : "outline"}
+                    className="w-full"
+                    onClick={() => setLanguage(locale)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
             </section>
 
             <Separator />
@@ -137,11 +147,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <section className="space-y-3">
               <Label>{t("companyLogo")}</Label>
               <div className="flex items-center gap-3">
-                <CompanyMark
-                  src={companyLogo}
-                  imgClassName="size-12 rounded-lg border"
-                  className="size-12"
-                />
+                {companyLogo ? (
+                  <CompanyMark
+                    src={companyLogo}
+                    imgClassName="size-12 rounded-lg border"
+                    className="size-12"
+                  />
+                ) : (
+                  <div
+                    className="size-12 shrink-0 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30"
+                    aria-hidden
+                  />
+                )}
                 <div className="flex flex-col gap-2">
                   <Button
                     type="button"
