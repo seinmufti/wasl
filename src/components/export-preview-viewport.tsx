@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { InvoiceExport } from "@/components/invoice-export";
 import type { Invoice, Locale } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -87,7 +87,6 @@ export function ExportPreviewViewport({
   companyPhone,
   companyEmail,
   companySignature,
-  exportRef,
   maxZoom = 1.25,
   className,
   onTap,
@@ -100,7 +99,6 @@ export function ExportPreviewViewport({
   companyPhone: string;
   companyEmail: string;
   companySignature: string | null;
-  exportRef?: RefObject<HTMLDivElement | null>;
   maxZoom?: number;
   className?: string;
   onTap?: () => void;
@@ -378,7 +376,6 @@ export function ExportPreviewViewport({
             }}
           >
             <div
-              ref={exportRef}
               className="shadow-sm"
               style={{
                 width: `${A4_WIDTH_MM}mm`,

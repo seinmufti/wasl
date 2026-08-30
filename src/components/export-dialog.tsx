@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Download, FileImage, FileText, Loader2, Share2, X } from "lucide-react";
 import { ExportPreviewViewport } from "@/components/export-preview-viewport";
+import { InvoiceExport } from "@/components/invoice-export";
 import { useSettings } from "@/components/settings-provider";
 import { Button } from "@/components/ui/button";
 import { captureA4, dataUrlToBlob, downloadBlob, imageToPdf, shareBlob } from "@/lib/export";
@@ -217,11 +218,31 @@ export function ExportDialog({
           companyPhone={companyPhone}
           companyEmail={companyEmail}
           companySignature={companySignature}
-          exportRef={exportRef}
           maxZoom={4}
           active={open}
           className="absolute inset-0 h-full w-full"
         />
+      </div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none fixed top-0 left-0 -z-10 opacity-[0.01]"
+      >
+        <div
+          ref={exportRef}
+          className="bg-white"
+          style={{ width: "210mm", height: "297mm" }}
+        >
+          <InvoiceExport
+            invoice={invoice}
+            locale={exportLocale}
+            companyLogo={companyLogo}
+            companyName={companyName}
+            companyPhone={companyPhone}
+            companyEmail={companyEmail}
+            companySignature={companySignature}
+          />
+        </div>
       </div>
 
       <div className="mt-auto shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">

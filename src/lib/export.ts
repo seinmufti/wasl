@@ -41,20 +41,38 @@ export function imageToPdf(dataUrl: string): Blob {
     format: "a4",
     compress: true,
   });
-  const format = dataUrl.startsWith("data:image/jpeg") ? "JPEG" : "PNG";
-  pdf.addImage(dataUrl, format, 0, 0, 210, 297, undefined, "FAST");
-  return pdf.output("blob");
+  const format = dataUrl.includes("image/jpeg") ? "JPEG" : "PNG";
+  pdf.addImage(dataUrl, format, 0, 0, 210, 297, undefined, "MEDIUM");
+  const blob = pdf.output("blob");
+  return blob.type === "application/pdf"
+    ? blob
+    : new Blob([blob], { type: "application/pdf" });
 }
 
 export async function downloadBlob(blob: Blob, filename: string): Promise<void> {
-  const url = URL.createObjectURL(blob);
+  const mimeType = filename.endsWith(".pdf")
+    ? "application/pdf"
+    : blob.type || "application/octet-stream";
+  const fileBlob =
+    blob.type === mimeType ? blob : new Blob([blob], { type: mimeType });
+  const url = URL.createObjectURL(fileBlob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.rel = "noopener";
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+
+  // iOS Safari ignores programmatic download; open the PDF so the user can save it.
+  const isIos =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIos && filename.endsWith(".pdf")) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
 }
 
 export async function shareBlob(
@@ -66,7 +84,12 @@ export async function shareBlob(
     throw new Error("Share not supported");
   }
 
-  const file = new File([blob], filename, { type: blob.type });
+  const mimeType = filename.endsWith(".pdf")
+    ? "application/pdf"
+    : blob.type || "application/octet-stream";
+  const fileBlob =
+    blob.type === mimeType ? blob : new Blob([blob], { type: mimeType });
+  const file = new File([fileBlob], filename, { type: mimeType });
 
   try {
     await navigator.share({ files: [file], title });
