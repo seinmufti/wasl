@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/exchange-rate/route.ts": {
+      "regions": ["dxb1", "bom1", "sin1", "fra1", "iad1"]
+    }
+  }
+}

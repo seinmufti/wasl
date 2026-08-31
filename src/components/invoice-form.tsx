@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { getInvoice, nextInvoiceId, saveInvoice } from "@/lib/db";
+import { loadUsdIqdSellRate } from "@/lib/exchange-rate";
 import { formatInvoiceDisplayId } from "@/lib/invoice-id";
 import { pickDummyInvoice } from "@/lib/dummy-invoices";
 import {
@@ -118,9 +119,8 @@ export function InvoiceForm({
 
     let cancelled = false;
 
-    fetch("/api/exchange-rate")
-      .then((response) => response.json())
-      .then(({ sellRate }: { sellRate: number }) => {
+    loadUsdIqdSellRate()
+      .then((sellRate) => {
         if (cancelled || !sellRate) return;
         setInvoice((current) =>
           current ? { ...current, exchangeRate2: sellRate } : current,
