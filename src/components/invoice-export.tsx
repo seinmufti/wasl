@@ -64,7 +64,7 @@ export function InvoiceExport({
         }}
       >
       <div dir={dir} className="flex h-full flex-col">
-      <header className="flex items-start justify-between gap-6 border-b border-neutral-200 pb-5" dir="ltr">
+      <header className="flex items-start justify-between gap-6 border-b border-neutral-200 pb-5">
         <div className="flex items-center gap-3">
           {companyLogo ? (
             <CompanyMark
@@ -77,23 +77,25 @@ export function InvoiceExport({
           <div>
             <p className="text-xl font-semibold tracking-tight">{displayName}</p>
             {companyPhone.trim() ? (
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-neutral-500" dir="ltr">
                 {formatPhoneDisplay(companyPhone)}
               </p>
             ) : null}
             {companyEmail.trim() ? (
-              <p className="text-sm text-neutral-500">{companyEmail.trim()}</p>
+              <p className="text-sm text-neutral-500" dir="ltr">
+                {companyEmail.trim()}
+              </p>
             ) : null}
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-end">
           <p className="text-xl font-semibold tracking-tight">
             {label("invoiceId")}: {formatInvoiceDisplayId(invoice.id)}
           </p>
-          <p className="text-sm text-neutral-500 tabular-nums">
+          <p className="text-sm text-neutral-500 tabular-nums" dir="ltr">
             {label("date")}: {invoiceDate}
           </p>
-          <p className="text-sm text-neutral-500 tabular-nums">
+          <p className="text-sm text-neutral-500 tabular-nums" dir="ltr">
             {label("time")}: {invoiceTime}
           </p>
         </div>
@@ -106,7 +108,7 @@ export function InvoiceExport({
       <section className="mt-4 grid gap-1 text-sm">
         <p className="text-base font-medium">{invoice.customerName}</p>
         {invoice.customerPhone ? (
-          <p>{formatPhoneDisplay(invoice.customerPhone)}</p>
+          <p dir="ltr">{formatPhoneDisplay(invoice.customerPhone)}</p>
         ) : null}
         {invoice.customerAddress ? (
           <p className="whitespace-pre-wrap text-neutral-700">
@@ -115,17 +117,17 @@ export function InvoiceExport({
         ) : null}
       </section>
 
-      <table className="mt-8 w-full border-collapse text-sm" dir="ltr">
+      <table className="mt-8 w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b-2 border-neutral-800 text-left">
-            <th className="py-2 font-semibold">{label("description")}</th>
-            <th className="w-16 py-2 text-right font-semibold">
+          <tr className="border-b-2 border-neutral-800">
+            <th className="py-2 text-start font-semibold">{label("description")}</th>
+            <th className="w-16 py-2 text-end font-semibold">
               {label("quantity")}
             </th>
-            <th className="w-28 py-2 text-right font-semibold">
+            <th className="w-28 py-2 text-end font-semibold">
               {label("unitPrice")}
             </th>
-            <th className="w-28 py-2 text-right font-semibold">
+            <th className="w-28 py-2 text-end font-semibold">
               {label("rowTotal")}
             </th>
           </tr>
@@ -138,14 +140,16 @@ export function InvoiceExport({
             )
             .map((line) => (
               <tr key={line.id} className="border-b border-neutral-200">
-                <td className="py-2.5" dir={dir}>
+                <td className="py-2.5 text-start" dir="auto">
                   {line.description || "—"}
                 </td>
-                <td className="py-2.5 text-right tabular-nums">{line.quantity}</td>
-                <td className="py-2.5 text-right tabular-nums">
+                <td className="py-2.5 text-end tabular-nums" dir="ltr">
+                  {line.quantity}
+                </td>
+                <td className="py-2.5 text-end tabular-nums" dir="ltr">
                   {formatUsd(line.unitPrice)}
                 </td>
-                <td className="py-2.5 text-right tabular-nums">
+                <td className="py-2.5 text-end tabular-nums" dir="ltr">
                   {formatUsd(lineTotal(line))}
                 </td>
               </tr>
@@ -159,7 +163,6 @@ export function InvoiceExport({
             ? "mt-8 grid grid-cols-2 items-stretch gap-6"
             : "mt-8 flex items-start justify-end"
         }
-        dir="ltr"
       >
         {companySignature ? (
           <div className="flex flex-col items-center justify-end">
@@ -170,27 +173,33 @@ export function InvoiceExport({
                 alt=""
                 className="h-16 max-w-full object-contain"
               />
-              <p className="text-center text-xs tabular-nums">{invoiceDate}</p>
-              <p className="text-center text-xs tabular-nums">{invoiceTime}</p>
+              <p className="text-center text-xs tabular-nums" dir="ltr">
+                {invoiceDate}
+              </p>
+              <p className="text-center text-xs tabular-nums" dir="ltr">
+                {invoiceTime}
+              </p>
             </div>
           </div>
         ) : null}
         <div
           className={
             companySignature
-              ? "ml-auto w-max max-w-full space-y-3 border-t border-neutral-200 pt-4 text-sm"
+              ? "ms-auto w-max max-w-full space-y-3 border-t border-neutral-200 pt-4 text-sm"
               : "w-max max-w-full space-y-3 border-t border-neutral-200 pt-4 text-sm"
           }
         >
           <div className="flex items-center justify-between gap-4 whitespace-nowrap">
             <span>{label("grandTotalUsd")}</span>
-            <span className="tabular-nums font-medium">{formatUsd(usd)}</span>
+            <span className="tabular-nums font-medium" dir="ltr">
+              {formatUsd(usd)}
+            </span>
           </div>
           {showIqd ? (
             <>
               <div className="flex items-center justify-between gap-4 text-neutral-600">
                 <span className="shrink-0">{label("exchangeRateShort")}</span>
-                <span className="tabular-nums text-right leading-snug">
+                <span className="tabular-nums text-end leading-snug" dir="ltr">
                   <span className="block whitespace-nowrap">
                     {EXCHANGE_RATE_USD_BASE} {label("usd")} =
                   </span>
@@ -201,7 +210,9 @@ export function InvoiceExport({
               </div>
               <div className="flex items-center justify-between gap-4 whitespace-nowrap text-base font-semibold">
                 <span>{label("grandTotalIqd")}</span>
-                <span className="tabular-nums">{formatIqd(iqd)}</span>
+                <span className="tabular-nums" dir="ltr">
+                  {formatIqd(iqd)}
+                </span>
               </div>
             </>
           ) : null}
