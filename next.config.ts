@@ -14,7 +14,13 @@ function getNetworkAddresses(): string[] {
   return [...new Set(addresses)];
 }
 
+const basePath = "/wasl";
+
 const nextConfig: NextConfig = {
+  basePath,
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   allowedDevOrigins: getNetworkAddresses(),
 };
 

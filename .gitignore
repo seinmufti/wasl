@@ -41,4 +41,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# local marketing snapshots (generated; not committed)
+/app-snapshots/

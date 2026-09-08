@@ -1,3 +1,4 @@
+import { withBasePath } from "@/lib/base-path";
 import { exchangeRateFieldClassName } from "@/lib/exchange-rate-ui";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +20,7 @@ export function HundredDollarBill({
       )}
     >
       <img
-        src="/images/hundred-dollar-bill.png"
+        src={withBasePath("/images/hundred-dollar-bill.png")}
         alt="100 dollar bill"
         className="absolute inset-0 h-full w-full object-fill"
       />

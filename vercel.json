@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/wasl",
+      "permanent": false
+    }
+  ],
   "functions": {
     "src/app/api/exchange-rate/route.ts": {
       "regions": ["bom1", "sin1", "fra1", "iad1"]

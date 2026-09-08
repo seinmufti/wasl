@@ -37,9 +37,15 @@ export function getNetworkAddress() {
   return null;
 }
 
+function frontendUrl(host, frontendPort) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/wasl";
+  return `http://${host}:${frontendPort}${basePath}`;
+}
+
 function backendUrl(host, frontendPort, backendPort) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/wasl";
   if (backendPort === frontendPort) {
-    return `http://${host}:${frontendPort}/api`;
+    return `http://${host}:${frontendPort}${basePath}/api`;
   }
   return `http://${host}:${backendPort}`;
 }
@@ -52,12 +58,12 @@ export function printHostBanner({ frontendPort, backendPort, mode = "dev" }) {
   console.log(label);
   console.log("");
   console.log("Local:");
-  console.log(`  Frontend: http://localhost:${frontendPort}`);
+  console.log(`  Frontend: ${frontendUrl("localhost", frontendPort)}`);
   console.log(`  Backend:  ${backendUrl("localhost", frontendPort, backendPort)}`);
   console.log("");
   console.log("Network:");
   if (networkIp) {
-    console.log(`  Frontend: http://${networkIp}:${frontendPort}`);
+    console.log(`  Frontend: ${frontendUrl(networkIp, frontendPort)}`);
     console.log(`  Backend:  ${backendUrl(networkIp, frontendPort, backendPort)}`);
   } else {
     console.log("  Frontend: (no network interface found)");

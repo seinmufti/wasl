@@ -1,3 +1,4 @@
+import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 import type { LanguageFlagId } from "@/lib/types";
 
@@ -26,7 +27,7 @@ export function LanguageFlag({
     return (
       <span aria-hidden className={cn(slot, className)}>
         <img
-          src="/images/kurdistan-flag.png"
+          src={withBasePath("/images/kurdistan-flag.png")}
           alt=""
           className="h-full w-full object-contain object-center"
         />
