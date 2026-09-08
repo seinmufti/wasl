@@ -15,7 +15,6 @@ import {
   setLanguage,
   updateSettings,
 } from "@/lib/db";
-import { withBasePath } from "@/lib/base-path";
 import { isRtl, t, type MessageKey } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -63,7 +62,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         let debug = settings.debugMode ?? false;
         try {
-          const response = await fetch(withBasePath("/api/debug-mode"));
+          const response = await fetch("/api/debug-mode");
           if (response.ok) {
             const { projectDebug } = (await response.json()) as {
               projectDebug: boolean;
@@ -125,7 +124,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setDebugModeState(enabled);
     await setDebugMode(enabled);
     try {
-      await fetch(withBasePath("/api/debug-mode"), {
+      await fetch("/api/debug-mode", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled }),

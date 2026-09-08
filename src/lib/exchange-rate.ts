@@ -1,5 +1,4 @@
 import { parseWesternInteger } from "@/lib/digits";
-import { withBasePath } from "@/lib/base-path";
 
 export type BorsaPrice = {
   id: number | string;
@@ -109,7 +108,7 @@ export async function loadUsdIqdSellRate(): Promise<number> {
     }
   }
 
-  const response = await fetch(withBasePath("/api/exchange-rate"), { cache: "no-store" });
+  const response = await fetch("/api/exchange-rate", { cache: "no-store" });
   const payload = (await response.json()) as { sellRate?: number };
   const sellRate = Number(payload.sellRate) || 0;
 
