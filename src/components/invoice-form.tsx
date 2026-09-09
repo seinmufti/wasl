@@ -429,22 +429,26 @@ export function InvoiceForm({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="font-medium">{t("exchangeRate")}</Label>
-              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_auto_auto] items-center gap-x-2 gap-y-1.5">
-                <HundredDollarBill
-                  id="rate-usd-2"
-                  className="row-span-3 self-center"
-                />
-                <span className="col-start-3 row-start-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-x-2">
+                <Label className="col-span-2 font-medium">
+                  {t("exchangeRate")}
+                </Label>
+                <span className="text-center text-xs font-medium text-amber-600 dark:text-amber-400">
                   Borsa ALAM
                 </span>
-                <span className="col-start-2 row-span-2 row-start-2 flex items-center self-stretch px-0.5 text-base font-medium text-muted-foreground">
+              </div>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_auto] items-center gap-x-2 gap-y-1.5">
+                <HundredDollarBill
+                  id="rate-usd-2"
+                  className="row-span-2 self-center"
+                />
+                <span className="col-start-2 row-span-2 flex items-center self-stretch px-0.5 text-base font-medium text-muted-foreground">
                   =
                 </span>
                 <ReadOnlyField
                   id="rate-iqd-2"
                   className={cn(
-                    "col-start-3 row-start-2 flex items-center justify-center px-2 py-0 text-amber-600",
+                    "col-start-3 row-start-1 flex items-center justify-center px-2 py-0 text-amber-600",
                     RATE_FIELD_SIZE,
                     "border-amber-300 bg-amber-50 hover:bg-amber-100 active:bg-amber-100/80 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-950/60",
                   )}
@@ -458,7 +462,7 @@ export function InvoiceForm({
                 </ReadOnlyField>
                 <div
                   className={cn(
-                    "col-start-3 row-start-3 flex items-center overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+                    "col-start-3 row-start-2 flex items-center overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
                     RATE_FIELD_SIZE,
                   )}
                 >
