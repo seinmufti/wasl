@@ -165,10 +165,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <SheetFooter className="mt-0 shrink-0 border-t">
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <a
+              href="https://nordlyssolutions.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
               <NordlysLogo />
               <span>{t("developedBy")}</span>
-            </div>
+            </a>
           </SheetFooter>
         </SheetContent>
       </Sheet>
