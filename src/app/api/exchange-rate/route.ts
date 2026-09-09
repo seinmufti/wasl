@@ -1,5 +1,6 @@
 import { fetchUsdIqdSellRate } from "@/lib/exchange-rate";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 export const preferredRegion = "fra1";
 export const maxDuration = 15;
