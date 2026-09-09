@@ -49,7 +49,7 @@ async function fetchBorsaPrices(): Promise<BorsaPrice[]> {
   const response = await fetch(BORSA_PRICES_URL, {
     cache: "no-store",
     headers: BORSA_FETCH_HEADERS,
-    signal: AbortSignal.timeout(12_000),
+    signal: AbortSignal.timeout(8_000),
   });
 
   if (!response.ok) {
@@ -99,20 +99,19 @@ export async function fetchUsdIqdSellRateFromBrowser(): Promise<number> {
 }
 
 export async function loadUsdIqdSellRate(): Promise<number> {
+  const response = await fetch("/api/exchange-rate", { cache: "no-store" });
+  const payload = (await response.json()) as { sellRate?: number };
+  const sellRate = Number(payload.sellRate) || 0;
+  if (sellRate > 0) return sellRate;
+
   if (typeof window !== "undefined") {
     try {
       const directRate = await fetchUsdIqdSellRateFromBrowser();
       if (directRate > 0) return directRate;
     } catch {
-      // CORS or network — fall back to same-origin API route.
+      // Borsa ALAM does not send CORS headers; this only succeeds in rare cases.
     }
   }
-
-  const response = await fetch("/api/exchange-rate", { cache: "no-store" });
-  const payload = (await response.json()) as { sellRate?: number };
-  const sellRate = Number(payload.sellRate) || 0;
-
-  if (sellRate > 0) return sellRate;
 
   throw new Error("Exchange rate unavailable.");
 }
