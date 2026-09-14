@@ -15,7 +15,18 @@ function getNetworkAddresses(): string[] {
 }
 
 const nextConfig: NextConfig = {
+  basePath: "/wasl",
   allowedDevOrigins: getNetworkAddresses(),
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/wasl",
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
